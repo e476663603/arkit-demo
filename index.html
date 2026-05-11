@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>AR Quick Look Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+      background: #000;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+    
+    .content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 40px 24px;
+      max-width: 480px;
+    }
+    
+    .ar-button {
+      display: inline-block;
+      position: relative;
+      margin-bottom: 48px;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(233, 69, 96, 0.4), 0 0 0 1px rgba(255,255,255,0.1);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    }
+    
+    .ar-button:hover {
+      transform: scale(1.03);
+      box-shadow: 0 12px 50px rgba(233, 69, 96, 0.5), 0 0 0 1px rgba(255,255,255,0.15);
+    }
+    
+    .ar-button:active {
+      transform: scale(0.98);
+    }
+    
+    .ar-button img {
+      display: block;
+      width: 280px;
+      max-width: 100%;
+      height: auto;
+    }
+    
+    .ar-button .ar-badge {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .ar-badge svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    .instructions {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: left;
+    }
+    
+    .instructions h2 {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #e94560;
+      margin-bottom: 16px;
+    }
+    
+    .instructions ol {
+      list-style: none;
+      counter-reset: steps;
+    }
+    
+    .instructions li {
+      counter-increment: steps;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      font-size: 15px;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 14px;
+    }
+    
+    .instructions li:last-child {
+      margin-bottom: 0;
+    }
+    
+    .instructions li::before {
+      content: counter(steps);
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: rgba(233, 69, 96, 0.2);
+      border: 1px solid rgba(233, 69, 96, 0.4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #e94560;
+      margin-top: 1px;
+    }
+    
+    .model-info {
+      margin-top: 20px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+    
+    .pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    /* iOS Safari AR button styling */
+    @supports (-webkit-touch-callout: none) {
+      .ar-button img {
+        -webkit-touch-callout: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  
+  <div class="content">
+    <a class="ar-button" href="model/test.usdz" rel="ar">
+      <img src="model/preview.jpg" alt="View 3D Model in AR">
+      <div class="ar-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 3L2 8l10 5 10-5-10-5zM2 13l10 5 10-5M2 18l10 5 10-5"/>
+        </svg>
+        View in AR
+      </div>
+    </a>
+    
+    <div class="instructions">
+      <h2>How to use</h2>
+      <ol>
+        <li>Click the button above to open AR view</li>
+        <li>Point your iPhone at a flat surface (floor, table)</li>
+        <li>Tap the screen to place the 3D model</li>
+        <li>Drag, pinch, or rotate to interact with the model</li>
+      </ol>
+      <div class="model-info">
+        Model: test.usdz &nbsp;|&nbsp; Powered by ARKit
+      </div>
+    </div>
+  </div>
+</body>
+</html>
