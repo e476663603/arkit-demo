@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>AR Quick Look Demo</title>
+  <title>AR Image Anchor Demo</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
@@ -18,7 +18,6 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
     }
     
     .bg-grid {
@@ -42,7 +41,7 @@
     .ar-button {
       display: inline-block;
       position: relative;
-      margin-bottom: 48px;
+      margin-bottom: 32px;
       border-radius: 20px;
       overflow: hidden;
       box-shadow: 0 8px 40px rgba(233, 69, 96, 0.4), 0 0 0 1px rgba(255,255,255,0.1);
@@ -86,6 +85,52 @@
     .ar-badge svg {
       width: 14px;
       height: 14px;
+    }
+    
+    .ref-image-section {
+      margin-bottom: 32px;
+    }
+    
+    .ref-image-section h3 {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #e94560;
+      margin-bottom: 12px;
+    }
+    
+    .ref-image-container {
+      display: inline-block;
+      border: 2px solid rgba(233, 69, 96, 0.4);
+      border-radius: 12px;
+      padding: 8px;
+      background: rgba(255,255,255,0.05);
+    }
+    
+    .ref-image-container img {
+      width: 200px;
+      height: 200px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    
+    .download-link {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 8px 20px;
+      background: rgba(233, 69, 96, 0.2);
+      border: 1px solid rgba(233, 69, 96, 0.4);
+      border-radius: 8px;
+      color: #e94560;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    
+    .download-link:hover {
+      background: rgba(233, 69, 96, 0.3);
     }
     
     .instructions {
@@ -148,16 +193,6 @@
       color: rgba(255,255,255,0.35);
     }
     
-    @keyframes pulse {
-      0%, 100% { opacity: 0.6; }
-      50% { opacity: 1; }
-    }
-    
-    .pulse {
-      animation: pulse 2s ease-in-out infinite;
-    }
-    
-    /* iOS Safari AR button styling */
     @supports (-webkit-touch-callout: none) {
       .ar-button img {
         -webkit-touch-callout: none;
@@ -169,7 +204,7 @@
   <div class="bg-grid"></div>
   
   <div class="content">
-    <a class="ar-button" href="model/test.usdz" rel="ar">
+    <a class="ar-button" href="model/test_anchored.usdz" rel="ar">
       <img src="model/preview.jpg" alt="View 3D Model in AR">
       <div class="ar-badge">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -179,16 +214,25 @@
       </div>
     </a>
     
+    <div class="ref-image-section">
+      <h3>Reference Image</h3>
+      <div class="ref-image-container">
+        <img src="model/reference_image.png" alt="AR Reference Image">
+      </div>
+      <br>
+      <a class="download-link" href="model/reference_image.png" download="reference_image.png">Download Reference Image</a>
+    </div>
+    
     <div class="instructions">
       <h2>How to use</h2>
       <ol>
-        <li>Click the button above to open AR view</li>
-        <li>Point your iPhone at a flat surface (floor, table)</li>
-        <li>Tap the screen to place the 3D model</li>
-        <li>Drag, pinch, or rotate to interact with the model</li>
+        <li>Download and print the reference image above (or display on another screen)</li>
+        <li>Tap the AR button above on your iPhone</li>
+        <li>Point your iPhone camera at the reference image</li>
+        <li>The 3D model will appear anchored on top of the image</li>
       </ol>
       <div class="model-info">
-        Model: test.usdz &nbsp;|&nbsp; Powered by ARKit
+        Model: test_anchored.usdz | Anchoring: ARKit Image Tracking | Powered by ARKit
       </div>
     </div>
   </div>
