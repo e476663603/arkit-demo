@@ -101,6 +101,12 @@
       text-align: left;
       line-height: 1.6;
     }
+    .error-msg {
+      color: #ff6b6b;
+      margin-top: 16px;
+      font-size: 13px;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -124,6 +130,7 @@
     </div>
 
     <div class="status" id="status"></div>
+    <div class="error-msg" id="errorMsg"></div>
 
     <div class="tip">
       💡 提示：<br>
@@ -134,8 +141,16 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/dist/mindar-image.prod.js"></script>
+  <!-- Load MindAR from local file (v1.1.5 with IIFE/UMD build) -->
+  <script src="assets/mindar-image.prod.js"></script>
   <script>
+    // Wait for library to load
+    if (typeof MINDAR === 'undefined' || !MINDAR.IMAGE) {
+      document.getElementById('errorMsg').style.display = 'block';
+      document.getElementById('errorMsg').textContent = '❌ MindAR 库加载失败，请检查 assets/mindar-image.prod.js 是否存在';
+      document.getElementById('compileBtn').disabled = true;
+    }
+
     let uploadedFile = null;
 
     function handleFile(input) {
@@ -148,11 +163,17 @@
       preview.style.display = 'block';
       document.getElementById('fileName').textContent = file.name;
       document.getElementById('compileBtn').disabled = false;
+      document.getElementById('errorMsg').style.display = 'none';
     }
 
     async function compile() {
       if (!uploadedFile) return;
-      
+      if (typeof MINDAR === 'undefined' || !MINDAR.IMAGE || !MINDAR.IMAGE.Compiler) {
+        document.getElementById('errorMsg').style.display = 'block';
+        document.getElementById('errorMsg').textContent = '❌ MindAR.Compiler 不可用';
+        return;
+      }
+
       const btn = document.getElementById('compileBtn');
       btn.disabled = true;
       btn.textContent = '编译中...';
@@ -173,9 +194,8 @@
         document.getElementById('progressBar').style.width = '50%';
         document.getElementById('status').textContent = '正在编译特征描述符...';
 
-        // Use MindAR compiler
+        // Use MindAR Compiler
         const compiler = new MINDAR.IMAGE.Compiler();
-        const maxTrack = 1;
         const result = await compiler.compileImageTargets([img], (progress) => {
           const pct = 50 + Math.round(progress * 50);
           document.getElementById('progressBar').style.width = pct + '%';
@@ -199,6 +219,8 @@
         btn.textContent = '重新编译';
       } catch (e) {
         document.getElementById('status').textContent = '❌ 编译失败：' + e.message;
+        document.getElementById('errorMsg').style.display = 'block';
+        document.getElementById('errorMsg').textContent = '编译错误: ' + e.message;
         console.error(e);
       }
       

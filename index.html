@@ -17,7 +17,6 @@
       overflow-x: hidden;
     }
 
-    /* Landing page */
     .landing {
       min-height: 100vh;
       display: flex;
@@ -47,10 +46,7 @@
       width: 100%;
     }
 
-    .logo {
-      font-size: 48px;
-      margin-bottom: 8px;
-    }
+    .logo { font-size: 48px; margin-bottom: 8px; }
 
     .title {
       font-size: 28px;
@@ -87,19 +83,9 @@
       margin-bottom: 28px;
     }
 
-    .start-btn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 12px 40px rgba(0, 212, 170, 0.4);
-    }
-
-    .start-btn:active {
-      transform: scale(0.97);
-    }
-
-    .start-btn svg {
-      width: 22px;
-      height: 22px;
-    }
+    .start-btn:hover { transform: scale(1.05); box-shadow: 0 12px 40px rgba(0, 212, 170, 0.4); }
+    .start-btn:active { transform: scale(0.97); }
+    .start-btn svg { width: 22px; height: 22px; }
 
     .ref-card {
       background: rgba(255,255,255,0.05);
@@ -119,10 +105,7 @@
       margin-bottom: 12px;
     }
 
-    .ref-card .img-wrap {
-      text-align: center;
-      margin-bottom: 12px;
-    }
+    .ref-card .img-wrap { text-align: center; margin-bottom: 12px; }
 
     .ref-card img {
       max-width: 240px;
@@ -144,9 +127,7 @@
       transition: background 0.2s;
     }
 
-    .ref-card .download:hover {
-      background: rgba(0, 212, 170, 0.25);
-    }
+    .ref-card .download:hover { background: rgba(0, 212, 170, 0.25); }
 
     .steps {
       background: rgba(255,255,255,0.03);
@@ -165,10 +146,7 @@
       margin-bottom: 14px;
     }
 
-    .steps ol {
-      list-style: none;
-      counter-reset: step;
-    }
+    .steps ol { list-style: none; counter-reset: step; }
 
     .steps li {
       counter-increment: step;
@@ -198,13 +176,8 @@
       margin-top: 1px;
     }
 
-    .tech-badge {
-      margin-top: 20px;
-      font-size: 11px;
-      color: rgba(255,255,255,0.25);
-    }
+    .tech-badge { margin-top: 20px; font-size: 11px; color: rgba(255,255,255,0.25); }
 
-    /* AR scene */
     #ar-scene {
       display: none;
       position: fixed;
@@ -226,9 +199,7 @@
       pointer-events: none;
     }
 
-    .ar-overlay > * {
-      pointer-events: auto;
-    }
+    .ar-overlay > * { pointer-events: auto; }
 
     .ar-status {
       font-size: 13px;
@@ -284,7 +255,6 @@
       transition: opacity 0.3s;
     }
 
-    /* Loading */
     .loading-overlay {
       position: fixed;
       inset: 0;
@@ -298,10 +268,7 @@
       transition: opacity 0.5s;
     }
 
-    .loading-overlay.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
+    .loading-overlay.hidden { opacity: 0; pointer-events: none; }
 
     .spinner {
       width: 40px;
@@ -312,14 +279,29 @@
       animation: spin 0.8s linear infinite;
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-text { font-size: 14px; color: rgba(255,255,255,0.5); }
+
+    .error-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10,10,10,0.95);
+      z-index: 3000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 40px;
+      text-align: center;
     }
 
-    .loading-text {
-      font-size: 14px;
-      color: rgba(255,255,255,0.5);
-    }
+    .error-overlay.show { display: flex; }
+
+    .error-overlay .icon { font-size: 48px; }
+    .error-overlay h2 { font-size: 20px; color: #ff6b6b; }
+    .error-overlay p { font-size: 14px; color: rgba(255,255,255,0.5); max-width: 320px; }
   </style>
 </head>
 <body>
@@ -328,6 +310,14 @@
   <div class="loading-overlay" id="loading">
     <div class="spinner"></div>
     <div class="loading-text">Loading AR Engine...</div>
+  </div>
+
+  <!-- Error -->
+  <div class="error-overlay" id="errorOverlay">
+    <div class="icon">⚠️</div>
+    <h2>AR 加载失败</h2>
+    <p id="errorMsg">请确认使用 iPhone Safari 或 Android Chrome 访问，并允许摄像头权限。</p>
+    <button class="start-btn" onclick="location.reload()" style="margin-top:12px;padding:12px 24px;font-size:14px;">刷新重试</button>
   </div>
 
   <!-- Landing page -->
@@ -348,9 +338,9 @@
       <div class="ref-card">
         <h3>识别图</h3>
         <div class="img-wrap">
-          <img src="assets/card.png" alt="AR Reference Image">
+          <img src="assets/reference.jpg" alt="AR Reference Image">
         </div>
-        <a class="download" href="assets/card.png" download="ar-reference.png">下载识别图</a>
+        <a class="download" href="assets/reference.jpg" download="ar-reference.jpg">下载识别图</a>
       </div>
 
       <div class="steps">
@@ -380,22 +370,54 @@
     <div class="ar-hint" id="ar-hint">请将摄像头对准识别图</div>
   </div>
 
-  <!-- MindAR + A-Frame scripts -->
-  <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/dist/mindar-image.prod.js"></script>
-  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <!-- MindAR + A-Frame scripts (LOCAL - no CDN dependency) -->
+  <script src="assets/mindar-image.prod.js"></script>
+  <script src="assets/aframe.min.js"></script>
+  <script src="assets/mindar-image-aframe.prod.js"></script>
 
   <script>
     let arScene = null;
     let foundTarget = false;
 
+    // Check if required libraries loaded
+    window.addEventListener('load', function() {
+      if (typeof MINDAR === 'undefined' || !MINDAR.IMAGE) {
+        document.getElementById('loading').classList.add('hidden');
+        showError('MindAR 库加载失败，请刷新页面重试。');
+        return;
+      }
+      if (typeof AFRAME === 'undefined') {
+        document.getElementById('loading').classList.add('hidden');
+        showError('A-Frame 库加载失败，请刷新页面重试。');
+        return;
+      }
+      document.getElementById('loading').classList.add('hidden');
+    });
+
+    function showError(msg) {
+      document.getElementById('errorMsg').textContent = msg;
+      document.getElementById('errorOverlay').classList.add('show');
+    }
+
     function startAR() {
+      if (typeof MINDAR === 'undefined' || typeof AFRAME === 'undefined') {
+        showError('AR 库未加载完成，请刷新页面。');
+        return;
+      }
+
+      // Check camera support
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showError('此浏览器不支持摄像头访问，请使用 HTTPS 下的 Safari/Chrome。');
+        return;
+      }
+
+      document.getElementById('loading').classList.remove('hidden');
       document.getElementById('landing').style.display = 'none';
       document.getElementById('ar-scene').style.display = 'block';
       
       // Create A-Frame scene dynamically
       const scene = document.createElement('a-scene');
-      scene.setAttribute('mindar-image', 'imageTargetSrc: assets/card.mind; autoStart: true; uiLoading: no; uiError: no; uiScanning: no');
+      scene.setAttribute('mindar-image', 'imageTargetSrc: assets/target.mind; autoStart: true; uiLoading: no; uiError: no; uiScanning: no');
       scene.setAttribute('color-space', 'sRGB');
       scene.setAttribute('renderer', 'colorManagement: true, physicallyCorrectLights');
       scene.setAttribute('vr-mode-ui', 'enabled: false');
@@ -426,25 +448,25 @@
       model.setAttribute('position', '0 0 0');
       model.setAttribute('rotation', '-90 0 0');
       model.setAttribute('scale', '0.5 0.5 0.5');
-      model.setAttribute('animation', 'property: position; from: 0 -0.2 0; to: 0 0.1 0; dur: 2000; easing: easeInOutQuad; loop: true; dir: alternate');
       target.appendChild(model);
-
-      // Scan line effect
-      const scanLine = document.createElement('a-plane');
-      scanLine.setAttribute('color', '#00d4aa');
-      scanLine.setAttribute('opacity', '0.3');
-      scanLine.setAttribute('width', '1');
-      scanLine.setAttribute('height', '0.01');
-      scanLine.setAttribute('position', '0 0 0.01');
-      scanLine.setAttribute('animation', 'property: position; from: -0.3 0 0.01; to: 0.3 0 0.01; dur: 1500; easing: easeInOutQuad; loop: true; dir: alternate');
-      target.appendChild(scanLine);
 
       scene.appendChild(target);
       document.getElementById('ar-scene').appendChild(scene);
       
       arScene = scene;
 
-      // Listen for target found/lost
+      // Listen for AR events
+      scene.addEventListener('arReady', () => {
+        console.log('AR Ready');
+        document.getElementById('loading').classList.add('hidden');
+      });
+
+      scene.addEventListener('arError', (e) => {
+        console.error('AR Error:', e);
+        document.getElementById('loading').classList.add('hidden');
+        showError('AR 启动失败: ' + (e.detail?.error || '未知错误'));
+      });
+
       scene.addEventListener('targetFound', () => {
         foundTarget = true;
         document.getElementById('ar-status-text').textContent = '已锁定识别图';
@@ -459,25 +481,24 @@
         document.querySelector('.ar-status .dot').style.background = '#00d4aa';
       });
 
-      // Hide loading when scene is ready
-      scene.addEventListener('loaded', () => {
-        document.getElementById('loading').classList.add('hidden');
-      });
-
-      // Fallback: hide loading after 5s
+      // Fallback: hide loading after 8s
       setTimeout(() => {
         document.getElementById('loading').classList.add('hidden');
-      }, 5000);
+      }, 8000);
     }
 
     function stopAR() {
       if (arScene) {
+        // Stop video tracks
+        const video = arScene.querySelector('video');
+        if (video && video.srcObject) {
+          video.srcObject.getTracks().forEach(t => t.stop());
+        }
         arScene.parentNode.removeChild(arScene);
         arScene = null;
       }
       document.getElementById('ar-scene').style.display = 'none';
       document.getElementById('landing').style.display = 'flex';
-      document.getElementById('loading').classList.remove('hidden');
       foundTarget = false;
       document.getElementById('ar-status-text').textContent = '扫描识别图中...';
       document.getElementById('ar-hint').textContent = '请将摄像头对准识别图';
