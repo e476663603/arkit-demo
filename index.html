@@ -15,6 +15,8 @@
       color: #fff;
       min-height: 100vh;
       overflow-x: hidden;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     .landing {
@@ -240,7 +242,7 @@
 
     .ar-hint {
       position: fixed;
-      bottom: max(env(safe-area-inset-bottom, 20px), 20px);
+      bottom: max(env(safe-area-inset-bottom, 20px), 80px);
       left: 50%;
       transform: translateX(-50%);
       z-index: 1001;
@@ -254,6 +256,133 @@
       white-space: nowrap;
       transition: opacity 0.3s;
     }
+
+    /* ===== Transform Controls (right side) ===== */
+    .transform-controls {
+      position: fixed;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 1002;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .transform-controls.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 14px;
+      padding: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .ctrl-group label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+      padding: 2px 0;
+    }
+
+    .ctrl-btn {
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ctrl-btn:active { background: rgba(255,255,255,0.25); }
+    .ctrl-btn.scale-up { color: #00d4aa; }
+    .ctrl-btn.scale-down { color: #ff6b6b; }
+
+    .scale-display {
+      font-size: 10px;
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 2px;
+    }
+
+    /* ===== Pin button (bottom center) ===== */
+    .pin-bar {
+      position: fixed;
+      bottom: max(env(safe-area-inset-bottom, 20px), 20px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1002;
+      display: flex;
+      gap: 8px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .pin-bar.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .pin-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: all 0.2s;
+    }
+
+    .pin-btn.pin {
+      background: rgba(0, 212, 170, 0.2);
+      border: 1px solid rgba(0, 212, 170, 0.4);
+      color: #00d4aa;
+    }
+
+    .pin-btn.pin:active { background: rgba(0, 212, 170, 0.35); }
+
+    .pin-btn.unpin {
+      background: rgba(255, 107, 107, 0.2);
+      border: 1px solid rgba(255, 107, 107, 0.4);
+      color: #ff6b6b;
+    }
+
+    .pin-btn.unpin:active { background: rgba(255, 107, 107, 0.35); }
+
+    .pin-btn.reset {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.7);
+    }
+
+    .pin-btn.reset:active { background: rgba(255,255,255,0.2); }
 
     .loading-overlay {
       position: fixed;
@@ -350,7 +479,7 @@
           <li>点击上方「启动 AR」按钮</li>
           <li>允许摄像头权限</li>
           <li>将摄像头对准识别图</li>
-          <li>3D 模型将锚定在识别图位置</li>
+          <li>模型锚定后可缩放旋转，也可「钉住」脱离识别图</li>
         </ol>
       </div>
 
@@ -367,6 +496,28 @@
       </div>
       <button class="close-ar" onclick="stopAR()">✕</button>
     </div>
+
+    <!-- Right side: scale & rotation controls -->
+    <div class="transform-controls" id="transformControls">
+      <div class="ctrl-group">
+        <label>缩放</label>
+        <button class="ctrl-btn scale-up" onclick="adjustScale(1.2)">+</button>
+        <div class="scale-display" id="scaleDisplay">1.0x</div>
+        <button class="ctrl-btn scale-down" onclick="adjustScale(0.833)">−</button>
+      </div>
+      <div class="ctrl-group">
+        <label>旋转</label>
+        <button class="ctrl-btn" onclick="adjustRotation(-15)">↶</button>
+        <button class="ctrl-btn" onclick="adjustRotation(15)">↷</button>
+      </div>
+    </div>
+
+    <!-- Bottom: pin/unpin & reset -->
+    <div class="pin-bar" id="pinBar">
+      <button class="pin-btn pin" id="pinBtn" onclick="pinModel()">📌 钉住位置</button>
+      <button class="pin-btn reset" onclick="resetTransform()">↺ 重置</button>
+    </div>
+
     <div class="ar-hint" id="ar-hint">请将摄像头对准识别图</div>
   </div>
 
@@ -378,6 +529,18 @@
   <script>
     let arScene = null;
     let foundTarget = false;
+    let modelPinned = false;
+    let currentScale = 1.0;
+    let currentRotY = 0;      // extra Y rotation from controls
+    let baseRotX = -90;        // base model rotation (X)
+    const BASE_SCALE = 0.3;    // initial scale factor (smaller to avoid blocking screen)
+
+    // Three.js references (set after scene init)
+    let threeScene = null;
+    let pinnedMeshGroup = null; // the detached group that stays in world space
+    let targetEntity = null;
+    let modelEntity = null;
+    let cameraEl = null;
 
     // Check if required libraries loaded
     window.addEventListener('load', function() {
@@ -399,13 +562,161 @@
       document.getElementById('errorOverlay').classList.add('show');
     }
 
+    function adjustScale(factor) {
+      currentScale *= factor;
+      if (currentScale < 0.05) currentScale = 0.05;
+      if (currentScale > 5.0) currentScale = 5.0;
+      applyTransform();
+      document.getElementById('scaleDisplay').textContent = currentScale.toFixed(1) + 'x';
+    }
+
+    function adjustRotation(deg) {
+      currentRotY += deg;
+      applyTransform();
+    }
+
+    function applyTransform() {
+      const s = BASE_SCALE * currentScale;
+      if (modelPinned && pinnedMeshGroup) {
+        // Update the pinned world-space group
+        pinnedMeshGroup.scale.set(s, s, s);
+        pinnedMeshGroup.rotation.set(THREE.MathUtils.degToRad(baseRotX), THREE.MathUtils.degToRad(currentRotY), 0);
+      } else if (modelEntity) {
+        modelEntity.setAttribute('scale', s + ' ' + s + ' ' + s);
+        modelEntity.setAttribute('rotation', baseRotX + ' ' + currentRotY + ' 0');
+      }
+      document.getElementById('scaleDisplay').textContent = currentScale.toFixed(1) + 'x';
+    }
+
+    function adjustScale(factor) {
+      currentScale = Math.max(0.1, Math.min(10, currentScale * factor));
+      applyTransform();
+    }
+
+    function adjustRotation(deg) {
+      currentRotY = (currentRotY + deg) % 360;
+      applyTransform();
+    }
+
+    function resetTransform() {
+      currentScale = 1.0;
+      currentRotY = 0;
+      applyTransform();
+    }
+
+    function applyTransform() {
+      const s = BASE_SCALE * currentScale;
+      if (modelPinned && pinnedMeshGroup) {
+        pinnedMeshGroup.scale.set(s, s, s);
+        pinnedMeshGroup.rotation.set(THREE.MathUtils.degToRad(baseRotX), THREE.MathUtils.degToRad(currentRotY), 0);
+      } else if (modelEntity) {
+        modelEntity.setAttribute('scale', s + ' ' + s + ' ' + s);
+        modelEntity.setAttribute('rotation', baseRotX + ' ' + currentRotY + ' 0');
+      }
+      document.getElementById('scaleDisplay').textContent = currentScale.toFixed(1) + 'x';
+    }
+
+    function pinModel() {
+      if (modelPinned) {
+        unpinModel();
+        return;
+      }
+
+      // Get the Three.js scene and camera
+      const aScene = document.querySelector('a-scene');
+      if (!aScene) return;
+      const threeRenderer = aScene.renderer;
+      threeScene = aScene.object3D;
+      cameraEl = aScene.camera;
+
+      // Get the current world matrix of the target entity's object3D
+      const targetObj3D = targetEntity.object3D;
+      if (!targetObj3D) return;
+
+      // Get the mesh from the model entity
+      const modelObj3D = modelEntity.object3D;
+      if (!modelObj3D) return;
+
+      // Create a group in world space and copy the current world transform
+      pinnedMeshGroup = new THREE.Group();
+
+      // Copy world position/rotation/scale from target entity
+      const worldPos = new THREE.Vector3();
+      const worldQuat = new THREE.Quaternion();
+      const worldScale = new THREE.Vector3();
+      targetObj3D.getWorldPosition(worldPos);
+      targetObj3D.getWorldQuaternion(worldQuat);
+      targetObj3D.getWorldScale(worldScale);
+
+      pinnedMeshGroup.position.copy(worldPos);
+      pinnedMeshGroup.quaternion.copy(worldQuat);
+
+      // Remove model from target and add to pinned group
+      // We need to clone the mesh because A-Frame still manages the original
+      const modelMesh = modelEntity.getObject3D('mesh');
+      if (modelMesh) {
+        // Clone the mesh
+        const cloned = modelMesh.clone(true);
+        // Apply current local transform of the model (scale, rotation)
+        const s = BASE_SCALE * currentScale;
+        cloned.scale.set(s, s, s);
+        cloned.rotation.set(THREE.MathUtils.degToRad(baseRotX), THREE.MathUtils.degToRad(currentRotY), 0);
+        cloned.position.set(0, 0, 0);
+        pinnedMeshGroup.add(cloned);
+      }
+
+      // Add to Three.js scene (world space, not under the AR target)
+      threeScene.add(pinnedMeshGroup);
+
+      // Hide the original model on the target
+      modelEntity.setAttribute('visible', false);
+
+      modelPinned = true;
+
+      // Update UI
+      document.getElementById('pinBtn').textContent = '📌 取消钉住';
+      document.getElementById('pinBtn').className = 'pin-btn unpin';
+      document.getElementById('ar-status-text').textContent = '模型已钉住（独立于识别图）';
+      document.getElementById('ar-hint').style.opacity = '0';
+    }
+
+    function unpinModel() {
+      if (!modelPinned) return;
+
+      // Remove pinned group from scene
+      if (pinnedMeshGroup && threeScene) {
+        threeScene.remove(pinnedMeshGroup);
+        // Dispose geometries and materials to free memory
+        pinnedMeshGroup.traverse(child => {
+          if (child.geometry) child.geometry.dispose();
+          if (child.material) {
+            if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
+            else child.material.dispose();
+          }
+        });
+        pinnedMeshGroup = null;
+      }
+
+      // Show the original model again
+      if (modelEntity) {
+        modelEntity.setAttribute('visible', true);
+      }
+
+      modelPinned = false;
+
+      // Update UI
+      document.getElementById('pinBtn').textContent = '📌 钉住位置';
+      document.getElementById('pinBtn').className = 'pin-btn pin';
+      document.getElementById('ar-status-text').textContent = foundTarget ? '已锁定识别图' : '扫描识别图中...';
+      document.getElementById('ar-hint').style.opacity = '1';
+    }
+
     function startAR() {
       if (typeof MINDAR === 'undefined' || typeof AFRAME === 'undefined') {
         showError('AR 库未加载完成，请刷新页面。');
         return;
       }
 
-      // Check camera support
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         showError('此浏览器不支持摄像头访问，请使用 HTTPS 下的 Safari/Chrome。');
         return;
@@ -441,19 +752,23 @@
       // Image target entity
       const target = document.createElement('a-entity');
       target.setAttribute('mindar-image-target', 'targetIndex: 0');
+      target.id = 'image-target';
       
-      // 3D model anchored to image
+      // 3D model anchored to image — start smaller
       const model = document.createElement('a-gltf-model');
+      model.id = 'ar-model';
       model.setAttribute('src', '#arModel');
       model.setAttribute('position', '0 0 0');
-      model.setAttribute('rotation', '-90 0 0');
-      model.setAttribute('scale', '0.5 0.5 0.5');
+      model.setAttribute('rotation', baseRotX + ' 0 0');
+      model.setAttribute('scale', BASE_SCALE + ' ' + BASE_SCALE + ' ' + BASE_SCALE);
       target.appendChild(model);
 
       scene.appendChild(target);
       document.getElementById('ar-scene').appendChild(scene);
       
       arScene = scene;
+      targetEntity = target;
+      modelEntity = model;
 
       // Listen for AR events
       scene.addEventListener('arReady', () => {
@@ -469,16 +784,23 @@
 
       scene.addEventListener('targetFound', () => {
         foundTarget = true;
-        document.getElementById('ar-status-text').textContent = '已锁定识别图';
-        document.getElementById('ar-hint').textContent = '模型已锚定 ✓';
-        document.querySelector('.ar-status .dot').style.background = '#3b82f6';
+        document.getElementById('ar-status-text').textContent = modelPinned ? '模型已钉住（独立于识别图）' : '已锁定识别图';
+        document.getElementById('ar-hint').textContent = modelPinned ? '模型已脱离识别图' : '可缩放/旋转，或钉住位置';
+        document.querySelector('.ar-status .dot').style.background = modelPinned ? '#a855f7' : '#3b82f6';
+        // Show controls
+        document.getElementById('transformControls').classList.add('visible');
+        document.getElementById('pinBar').classList.add('visible');
       });
 
       scene.addEventListener('targetLost', () => {
         foundTarget = false;
-        document.getElementById('ar-status-text').textContent = '扫描识别图中...';
-        document.getElementById('ar-hint').textContent = '请将摄像头对准识别图';
-        document.querySelector('.ar-status .dot').style.background = '#00d4aa';
+        if (!modelPinned) {
+          document.getElementById('ar-status-text').textContent = '扫描识别图中...';
+          document.getElementById('ar-hint').textContent = '请将摄像头对准识别图';
+          document.querySelector('.ar-status .dot').style.background = '#00d4aa';
+        } else {
+          document.getElementById('ar-status-text').textContent = '模型已钉住（独立于识别图）';
+        }
       });
 
       // Fallback: hide loading after 8s
@@ -488,8 +810,10 @@
     }
 
     function stopAR() {
+      // Unpin first if pinned
+      if (modelPinned) unpinModel();
+
       if (arScene) {
-        // Stop video tracks
         const video = arScene.querySelector('video');
         if (video && video.srcObject) {
           video.srcObject.getTracks().forEach(t => t.stop());
@@ -499,10 +823,20 @@
       }
       document.getElementById('ar-scene').style.display = 'none';
       document.getElementById('landing').style.display = 'flex';
+      document.getElementById('transformControls').classList.remove('visible');
+      document.getElementById('pinBar').classList.remove('visible');
       foundTarget = false;
+      modelPinned = false;
+      currentScale = 1.0;
+      currentRotY = 0;
+      targetEntity = null;
+      modelEntity = null;
       document.getElementById('ar-status-text').textContent = '扫描识别图中...';
       document.getElementById('ar-hint').textContent = '请将摄像头对准识别图';
+      document.getElementById('ar-hint').style.opacity = '1';
       document.querySelector('.ar-status .dot').style.background = '#00d4aa';
+      document.getElementById('pinBtn').textContent = '📌 钉住位置';
+      document.getElementById('pinBtn').className = 'pin-btn pin';
     }
   </script>
 </body>
