@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindAR 图像编译器</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #00d4aa, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p { color: rgba(255,255,255,0.5); font-size: 14px; margin-bottom: 24px; }
+    .upload-zone {
+      border: 2px dashed rgba(0, 212, 170, 0.3);
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+    }
+    .upload-zone:hover {
+      border-color: rgba(0, 212, 170, 0.6);
+      background: rgba(0, 212, 170, 0.05);
+    }
+    .upload-zone input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .upload-zone .icon { font-size: 40px; margin-bottom: 12px; }
+    .upload-zone .text { font-size: 14px; color: rgba(255,255,255,0.5); }
+    #preview {
+      max-width: 300px;
+      max-height: 200px;
+      border-radius: 8px;
+      margin: 0 auto 16px;
+      display: none;
+    }
+    .btn {
+      padding: 12px 28px;
+      background: linear-gradient(135deg, #00d4aa, #3b82f6);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn:hover { transform: scale(1.03); }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .status {
+      margin-top: 16px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+    }
+    .progress {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      margin-top: 12px;
+      overflow: hidden;
+      display: none;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #00d4aa, #3b82f6);
+      width: 0%;
+      transition: width 0.3s;
+    }
+    .tip {
+      margin-top: 20px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.3);
+      text-align: left;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📷 MindAR 图像编译器</h1>
+    <p>上传识别图，编译生成 .mind 追踪文件</p>
+
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" accept="image/*" id="fileInput" onchange="handleFile(this)">
+      <div class="icon">📁</div>
+      <div class="text">点击或拖拽上传识别图<br>建议使用高对比度、特征丰富的图片</div>
+    </div>
+
+    <img id="preview" alt="Preview">
+    <div id="fileName" style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:12px;"></div>
+
+    <button class="btn" id="compileBtn" onclick="compile()" disabled>编译 .mind 文件</button>
+
+    <div class="progress" id="progress">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="status" id="status"></div>
+
+    <div class="tip">
+      💡 提示：<br>
+      · 识别图应有丰富的纹理和特征点（避免纯色/渐变/模糊）<br>
+      · 建议图片大小 300×300 ~ 2000×2000 像素<br>
+      · 编译完成后会自动下载 .mind 文件<br>
+      · 将 .mind 文件放到项目的 assets/ 目录中，并更新 index.html 中的引用路径
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/dist/mindar-image.prod.js"></script>
+  <script>
+    let uploadedFile = null;
+
+    function handleFile(input) {
+      const file = input.files[0];
+      if (!file) return;
+      uploadedFile = file;
+      
+      const preview = document.getElementById('preview');
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = 'block';
+      document.getElementById('fileName').textContent = file.name;
+      document.getElementById('compileBtn').disabled = false;
+    }
+
+    async function compile() {
+      if (!uploadedFile) return;
+      
+      const btn = document.getElementById('compileBtn');
+      btn.disabled = true;
+      btn.textContent = '编译中...';
+      
+      document.getElementById('progress').style.display = 'block';
+      document.getElementById('status').textContent = '正在提取图像特征...';
+      document.getElementById('progressBar').style.width = '30%';
+
+      try {
+        // Load image
+        const img = new Image();
+        img.src = URL.createObjectURL(uploadedFile);
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+
+        document.getElementById('progressBar').style.width = '50%';
+        document.getElementById('status').textContent = '正在编译特征描述符...';
+
+        // Use MindAR compiler
+        const compiler = new MINDAR.IMAGE.Compiler();
+        const maxTrack = 1;
+        const result = await compiler.compileImageTargets([img], (progress) => {
+          const pct = 50 + Math.round(progress * 50);
+          document.getElementById('progressBar').style.width = pct + '%';
+        });
+
+        document.getElementById('progressBar').style.width = '100%';
+        document.getElementById('status').textContent = '编译完成！正在下载...';
+
+        // Export as .mind file
+        const exportedBuffer = await compiler.exportData();
+        const blob = new Blob([exportedBuffer], { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = uploadedFile.name.replace(/\.[^.]+$/, '') + '.mind';
+        a.click();
+        URL.revokeObjectURL(url);
+
+        document.getElementById('status').textContent = '✅ 编译完成！文件已下载';
+        btn.textContent = '重新编译';
+      } catch (e) {
+        document.getElementById('status').textContent = '❌ 编译失败：' + e.message;
+        console.error(e);
+      }
+      
+      btn.disabled = false;
+    }
+  </script>
+</body>
+</html>
